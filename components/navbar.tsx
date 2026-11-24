@@ -2,8 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Music, Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Music, Menu, X, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
 export interface NavItem {
   label: string;
@@ -22,8 +24,13 @@ export interface NavbarProps {
 }
 
 export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
+  const pathname = usePathname();
+  const { user, profile, signOut, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [scrolled, setScrolled] = React.useState(false);
+
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +40,8 @@ export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (pathname === "/auth") return null;
 
   return (
     <header
@@ -73,18 +82,50 @@ export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
 
         {/* Desktop Action Buttons */}
         <div className="hidden items-center gap-4 md:flex">
-          <Link
-            href="/login"
-            className="text-sm font-medium text-white/80 transition-colors hover:text-white"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="#create"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200 active:scale-95 shadow-sm"
-          >
-            Get Started
-          </Link>
+          {!isLoading && user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5 rounded-full bg-white/10 py-1.5 pl-2 pr-3.5 border border-white/10 backdrop-blur-md">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="size-7 rounded-full object-cover ring-1 ring-white/20"
+                  />
+                ) : (
+                  <div className="flex size-7 items-center justify-center rounded-full bg-purple-500/30 text-xs font-semibold text-white">
+                    <UserIcon className="size-3.5" />
+                  </div>
+                )}
+                <span className="text-sm font-medium text-white/90 max-w-[120px] truncate">
+                  {displayName}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => signOut()}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-white/60 hover:text-white transition-colors duration-200 px-3 py-1.5 rounded-full hover:bg-white/10"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/auth"
+                className="text-sm font-medium text-white/80 transition-colors hover:text-white"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth"
+                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200 active:scale-95 shadow-sm"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu trigger */}
@@ -113,20 +154,56 @@ export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
               </Link>
             ))}
             <div className="mt-4 flex flex-col gap-2.5 pt-4 border-t border-white/10">
-              <Link
-                href="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-center text-sm font-medium text-white/80 py-2 hover:text-white"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="#create"
-                onClick={() => setMobileMenuOpen(false)}
-                className="rounded-full bg-white px-4 py-2.5 text-center text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200"
-              >
-                Get Started
-              </Link>
+              {!isLoading && user ? (
+                <>
+                  <div className="flex items-center gap-3 py-2 px-1">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatarUrl}
+                        alt={displayName}
+                        className="size-8 rounded-full object-cover ring-1 ring-white/20"
+                      />
+                    ) : (
+                      <div className="flex size-8 items-center justify-center rounded-full bg-purple-500/30 text-xs font-semibold text-white">
+                        <UserIcon className="size-4" />
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-white">{displayName}</span>
+                      <span className="text-xs text-white/50">{user.email}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="flex items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/20"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/auth"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-center text-sm font-medium text-white/80 py-2 hover:text-white"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-full bg-white px-4 py-2.5 text-center text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
