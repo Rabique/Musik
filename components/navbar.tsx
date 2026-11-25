@@ -84,6 +84,17 @@ export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
         <div className="hidden items-center gap-4 md:flex">
           {!isLoading && user ? (
             <div className="flex items-center gap-3">
+              <Link
+                href="/workspace"
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-semibold transition-all shadow-sm",
+                  pathname === "/workspace"
+                    ? "bg-white/15 text-white border border-white/20"
+                    : "bg-white text-zinc-950 hover:bg-zinc-200 active:scale-95"
+                )}
+              >
+                Workspace
+              </Link>
               <div className="flex items-center gap-2.5 rounded-full bg-white/10 py-1.5 pl-2 pr-3.5 border border-white/10 backdrop-blur-md">
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -174,17 +185,26 @@ export function Navbar({ items = defaultNavItems, className }: NavbarProps) {
                       <span className="text-xs text-white/50">{user.email}</span>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      signOut();
-                    }}
-                    className="flex items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/20"
-                  >
-                    <LogOut className="size-4" />
-                    <span>Sign Out</span>
-                  </button>
+                  <div className="flex flex-col gap-2 pt-1">
+                    <Link
+                      href="/workspace"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="rounded-full bg-white px-4 py-2.5 text-center text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200"
+                    >
+                      Workspace로 이동
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        signOut();
+                      }}
+                      className="flex items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-center text-sm font-medium text-white transition-all hover:bg-white/20"
+                    >
+                      <LogOut className="size-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>

@@ -12,7 +12,7 @@ const musikHeroValues: HeroProps = {
   primaryCTA: {
     ctaEnabled: true,
     text: "음악 생성하기",
-    link: "/hello",
+    link: "/workspace",
     size: "default",
   },
 };

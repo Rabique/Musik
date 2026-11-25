@@ -45,9 +45,10 @@ function AuthContent() {
 
     React.useEffect(() => {
         if (!isAuthLoading && user) {
-            router.replace("/");
+            const next = searchParams.get("next") || "/workspace";
+            router.replace(next);
         }
-    }, [user, isAuthLoading, router]);
+    }, [user, isAuthLoading, router, searchParams]);
 
     React.useEffect(() => {
         const errorParam = searchParams.get("error");

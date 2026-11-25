@@ -31,7 +31,26 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Avoid writing logic between createServerClient and
   // supabase.auth.getUser(). A simple mistake could cause users to be logged out.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Protect /workspace: redirect to /auth if not logged in
+  if (!user && request.nextUrl.pathname.startsWith("/workspace")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth";
+    url.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Redirect logged-in users visiting /auth to /workspace
+  if (user && request.nextUrl.pathname === "/auth") {
+    const nextPath = request.nextUrl.searchParams.get("next") || "/workspace";
+    const url = request.nextUrl.clone();
+    url.pathname = nextPath;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
